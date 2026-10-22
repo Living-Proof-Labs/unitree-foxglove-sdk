@@ -163,6 +163,12 @@ lint, and `task ci:fall` for deliberate-fall incident recording. A separate
 **Locomotion benchmarks** workflow runs `task ci:walk` and `task ci:hallway`,
 keeping documented gait failures visible.
 
+For a quick result, open the Actions run's **Summary** or a named **test results**
+check on the commit/PR. These show pass/fail/skip counts, test durations, and
+failure details. Simulation reports separate image build, acceptance, and replay.
+Comparisons appear once earlier published results are available; the first report
+establishes a baseline.
+
 Download a run's artifacts for JUnit reports, telemetry and event MCAPs, replay
 screenshots, command/Compose logs, and asciinema terminal casts. Artifacts are
 retained for 14 days and uploaded even on failure. See

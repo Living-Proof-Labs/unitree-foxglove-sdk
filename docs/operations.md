@@ -224,8 +224,8 @@ a failed acceptance check can therefore show a successful evidence-rendering
 stage. Missing results are errors or explicitly unstarted stages, never empty
 successful suites.
 
-The publisher enables comparison with earlier reported commits when a baseline
-is available. The first report establishes that baseline. Raw JUnit XML and the
+Reporting uses the pinned [Publish Test Results action](https://github.com/EnricoMi/publish-unit-test-result-action).
+It enables comparison with earlier reported commits when a baseline is available. The first report establishes that baseline. Raw JUnit XML and the
 publisher's JSON result remain in the artifact for further analysis. Fork PRs
 with read-only tokens still get an Actions summary and artifacts; publishing a
 commit check is disabled for those runs.
