@@ -158,3 +158,17 @@ Recordings land in `recordings/` on the host. They are gitignored. The latest fi
 - A new robot needs a `RobotProfile` whose IDL family matches the scene (more than 20 actuators selects `hg` inside upstream's bridge) and whose joint names match that scene's sensor order.
 - Do not vendor a second copy of `g1.yaml` numbers. Load the file.
 - Do not edit `third_party/` to fix a behavior this process can wrap. `MotorFirmwareBridge` is the pattern: subclass, keep upstream's DDS setup, replace the part that is wrong.
+
+## Continuous integration
+
+GitHub Actions runs `task ci:unit` on pull requests, pushes to `main`, and manual
+workflow dispatches. The same task works locally: it builds the image, runs the
+unit suite, and checks source/tests with `task lint`. Tests produce JUnit XML.
+`artifacts/unit/` and `artifacts/lint/` retain command logs, exit codes/timings in
+`run.json`, and asciinema v2 `terminal.cast` files (`asciinema play terminal.cast`).
+The workflow uploads these files even when a check fails, retaining them for 14
+days. Download them from the workflow run's **Artifacts** section.
+
+For a Linux x86_64 host without Task, `bash scripts/install-task.sh INSTALL_DIR`
+installs the same checksum-verified Task 3.48.0 used in CI. Add that directory to
+`PATH`. Docker and its Compose plugin must also be available.

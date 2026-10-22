@@ -27,3 +27,7 @@ recordings/
 *.plan.md
 *.swp
 *~
+
+# Local and CI evidence
+artifacts/
+work/
