@@ -172,3 +172,32 @@ days. Download them from the workflow run's **Artifacts** section.
 For a Linux x86_64 host without Task, `bash scripts/install-task.sh INSTALL_DIR`
 installs the same checksum-verified Task 3.48.0 used in CI. Add that directory to
 `PATH`. Docker and its Compose plugin must also be available.
+
+`task ci:fall` independently checks a deliberate fall, health reaching `incident`,
+and exactly one event MCAP with a 10-second post-roll. It runs in the **CI**
+workflow alongside unit/lint checks. `task e2e-fall` reuses the image;
+`task e2e-fall:with-build` builds first. Separating it from the walk ensures a gait
+failure cannot skip incident coverage.
+
+The separate **Locomotion benchmarks** workflow runs `task ci:walk` and
+`task ci:hallway` on PRs, `main`, and manual dispatches. These exercise the same
+`task e2e` and `task e2e-hallway` acceptance checks developers run. The known gait
+instability remains a real failed job with its original exit status; there is no
+`continue-on-error`, automatic retry, or relaxed threshold. Treat these as
+experimental acceptance benchmarks, separately from core CI. Each scenario has
+its own runner, so DDS domains and ports cannot collide between jobs.
+
+Every simulation job uploads telemetry MCAPs and incident event MCAPs, full
+Compose logs, command logs, exit status/timing JSON, and playable terminal casts,
+including on failure. Download from the workflow run's **Artifacts** section or
+its job-summary link. `task artifacts:summary RUN=e2e-fall` reproduces the report
+locally. Terminal casts contain captured command output and can be played with
+`asciinema play terminal.cast`.
+
+After each simulation, software rendering replays the recorded base pose and
+joint states into MuJoCo and writes PNG screenshots at the start, midpoint, end,
+and lowest base height. `replay.json` records each screenshot's source timestamp,
+health/navigation transitions, and minimum height. Rendering happens after the
+simulator has stopped, so it cannot affect control-loop timing. Hallway walls
+are translucent in these review images. To render an existing local run:
+`task artifacts:render RUN=e2e-hallway WORLD=hallway10`.

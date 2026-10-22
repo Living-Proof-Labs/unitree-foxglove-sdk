@@ -20,6 +20,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         libglfw3 \
         libglib2.0-0 \
         libopengl0 \
+        libosmesa6 \
         xvfb \
     && rm -rf /var/lib/apt/lists/*
 

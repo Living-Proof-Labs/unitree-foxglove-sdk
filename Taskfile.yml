@@ -75,6 +75,8 @@ tasks:
       - task: test
 
   e2e:
+    env:
+      E2E_MODE: all
     desc: Headless walk and deliberate fall using the existing image
     deps: [image-ready]
     cmds:
@@ -99,6 +101,55 @@ tasks:
     cmds:
       - task: build
       - task: e2e-hallway
+
+  e2e-fall:
+    desc: Deliberate fall, health incident, and event MCAP without a preceding walk
+    deps: [image-ready]
+    env:
+      E2E_MODE: fall
+    cmds:
+      - bash scripts/e2e.sh
+
+  e2e-fall:with-build:
+    desc: Build the image, then check the deliberate fall and event MCAP
+    cmds:
+      - task: build
+      - task: e2e-fall
+
+  artifacts:render:
+    desc: Copy a simulation recording and render MCAP replay screenshots (RUN and WORLD)
+    deps: [image-ready]
+    requires:
+      vars: [RUN]
+    cmds:
+      - mkdir -p "artifacts/{{.RUN}}"
+      - cp -a "recordings/{{.RUN}}/." "artifacts/{{.RUN}}/"
+      - docker compose run --rm --no-deps -e MUJOCO_GL=osmesa -v "{{.ROOT_DIR}}/artifacts/{{.RUN}}:/evidence" --entrypoint python sim -m unitree_foxglove.render_mcap /evidence --world "{{.WORLD | default "open"}}"
+
+  artifacts:summary:
+    desc: Summarize a simulation artifact directory (RUN)
+    requires:
+      vars: [RUN]
+    cmds:
+      - python3 scripts/summarize.py "artifacts/{{.RUN}}"
+
+  ci:fall:
+    desc: Build and validate incident recording with MCAPs, screenshots, logs, and cast
+    cmds:
+      - python3 scripts/capture.py artifacts/e2e-fall/build -- task build
+      - bash scripts/simulation_check.sh fall
+
+  ci:walk:
+    desc: Build and run the walk acceptance benchmark with evidence, including on failure
+    cmds:
+      - python3 scripts/capture.py artifacts/e2e/build -- task build
+      - bash scripts/simulation_check.sh walk
+
+  ci:hallway:
+    desc: Build and run the hallway acceptance benchmark with evidence, including on failure
+    cmds:
+      - python3 scripts/capture.py artifacts/e2e-hallway/build -- task build
+      - bash scripts/simulation_check.sh hallway
 
   down:
     desc: Stop every service

@@ -1,0 +1,63 @@
+name: Locomotion benchmarks
+
+# These are acceptance checks for the documented unstable pretrained gait.
+# Keep failures visible in a separate workflow; do not retry or relax thresholds.
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: locomotion-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  benchmark:
+    name: ${{ matrix.scenario }} acceptance
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - scenario: walk
+            task: ci:walk
+            run: e2e
+          - scenario: hallway
+            task: ci:hallway
+            run: e2e-hallway
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Task 3.48.0
+        run: |
+          bash scripts/install-task.sh "$RUNNER_TEMP/bin"
+          echo "$RUNNER_TEMP/bin" >> "$GITHUB_PATH"
+      - name: Run acceptance check through Task
+        env:
+          CHECK_TASK: ${{ matrix.task }}
+        run: task "$CHECK_TASK"
+      - name: Summarize simulation evidence
+        if: always()
+        env:
+          CHECK_RUN: ${{ matrix.run }}
+        run: task artifacts:summary RUN="$CHECK_RUN" >> "$GITHUB_STEP_SUMMARY"
+      - name: Upload MCAPs, replay screenshots, logs, and terminal casts
+        if: always()
+        id: upload
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.scenario }}-${{ github.run_id }}-${{ github.run_attempt }}
+          path: artifacts/${{ matrix.run }}/
+          if-no-files-found: warn
+          retention-days: 14
+      - name: Link downloadable evidence
+        if: always()
+        env:
+          CHECK_RUN: ${{ matrix.run }}
+          ARTIFACT_URL: ${{ steps.upload.outputs.artifact-url }}
+        run: |
+          echo "[Download evidence]($ARTIFACT_URL)" >> "$GITHUB_STEP_SUMMARY"

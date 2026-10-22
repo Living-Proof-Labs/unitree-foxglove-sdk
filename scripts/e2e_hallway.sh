@@ -38,7 +38,14 @@ compose() {
 }
 
 cleanup() {
+  local result=$?
+  trap - EXIT
+  # Close MCAPs and collect diagnostics before removing containers, even on failure.
+  compose stop bridge >/dev/null 2>&1 || true
+  compose logs --no-color > "$output_dir/compose.log" 2>&1 || true
+  compose ps -a > "$output_dir/compose-ps.txt" 2>&1 || true
   compose down --remove-orphans >/dev/null 2>&1 || true
+  exit "$result"
 }
 trap cleanup EXIT
 
