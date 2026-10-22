@@ -47,7 +47,7 @@ All three services use the host network on DDS domain 1, interface `lo`, so they
 ## Prerequisites
 
 - Docker Engine with Compose v2, your user in the `docker` group, and [Task](https://taskfile.dev/).
-- An X11 session for the simulator window (`xhost +local:docker` once per login). Headless mode needs none.
+- An X11 session for the simulator window. `task up` allows local clients onto that display when `DISPLAY` is set. Headless mode needs none.
 - A browser for the [Foxglove web app](https://app.foxglove.dev/). It connects to `ws://localhost:8765` because browsers treat localhost as a secure origin. The desktop app works the same way if you prefer it.
 
 ## Run

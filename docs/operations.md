@@ -103,6 +103,8 @@ In the web app the sidebar lists `/robot/joint_states`, `/robot/base_pose`, `/tf
 
 **"Check that the WebSocket server at ws://localhost:8765 is reachable."** The bridge is not running. `task up` was stopped, or it has not logged the live-connection line yet. Reload the tab after that line appears.
 
+**`PermissionError: Permission denied` while opening the MCAP, then the bridge exits.** Compose created `recordings/` as root because the directory did not exist yet. `task up` and the headless scripts create it as the host user, and take it back with `sudo` when it is not writable.
+
 **Empty 3D, "image topic does not exist", diagnostics unavailable, while the topic list on the left is the `/robot/...` set.** The connection is fine. The open layout is an ANYbotics layout. Import `foxglove/g1-layout.json` and select it.
 
 **The robot swings from the rope before Stand.** Motors are off. That is the start state, not a physics failure. It should settle rather than orbit. Stand, start the policy, lower, then release.
@@ -139,7 +141,7 @@ A shell with `UNITREE_DOMAIN_ID` exported will leak into local pytest through `S
 
 `docker compose build` is the image `unitree-foxglove:local`. It is large because of the G1 meshes and the Python environment. Pruning images is safe; the next `task up` rebuilds. Do not prune while the user is mid-run unless they ask.
 
-Recordings land in `recordings/` on the host. They are gitignored. The latest file can be tens or hundreds of megabytes after a long Teleop session.
+Recordings land in `recordings/` on the host. They are gitignored. `task up` creates that directory before Compose starts, so the daemon does not create a root-owned mount. The latest file can be tens or hundreds of megabytes after a long Teleop session.
 
 ## Changing the system
 
