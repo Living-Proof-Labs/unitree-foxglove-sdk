@@ -63,7 +63,7 @@ tasks:
       - docker compose run --rm --no-deps -v "{{.ROOT_DIR}}:/workspace:ro" -w /workspace --entrypoint ruff sim check --no-cache src tests scripts
 
   ci:unit:
-    desc: Build, lint, and run unit tests with logs and a terminal cast
+    desc: Build, run unit tests, and lint with logs and a terminal cast
     cmds:
       - python3 scripts/capture.py artifacts/unit -- task test:with-build
       - python3 scripts/capture.py artifacts/lint -- task lint
@@ -123,6 +123,8 @@ tasks:
       vars: [RUN]
     cmds:
       - mkdir -p "artifacts/{{.RUN}}"
+      - rm -f "artifacts/{{.RUN}}/"*.mcap "artifacts/{{.RUN}}/replay.json"
+      - rm -rf "artifacts/{{.RUN}}/screenshots" "artifacts/{{.RUN}}/events"
       - cp -a "recordings/{{.RUN}}/." "artifacts/{{.RUN}}/"
       - docker compose run --rm --no-deps -e MUJOCO_GL=osmesa -v "{{.ROOT_DIR}}/artifacts/{{.RUN}}:/evidence" --entrypoint python sim -m unitree_foxglove.render_mcap /evidence --world "{{.WORLD | default "open"}}"
 

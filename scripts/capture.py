@@ -27,6 +27,11 @@ def main() -> None:
     started = datetime.now(timezone.utc)
     before = time.monotonic()
     metadata = {"command": command, "started_utc": started.isoformat()}
+    revision = subprocess.run(
+        ["git", "rev-parse", "HEAD"], capture_output=True, text=True, check=False,
+    )
+    if revision.returncode == 0:
+        metadata["commit"] = revision.stdout.strip()
     with (
         (args.directory / "task.log").open("wb") as log,
         (args.directory / "terminal.cast").open("w") as cast,

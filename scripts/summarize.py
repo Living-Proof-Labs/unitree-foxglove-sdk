@@ -22,8 +22,14 @@ if report.exists():
             "- Health: " + " → ".join(recording['health']),
             "- Navigation: " + (" → ".join(recording['navigation']) or "not active"),
         ])
-lines.extend(["", "Artifact includes telemetry/event MCAPs, replay PNGs, Compose logs,",
-              "command logs, exit metadata, and asciinema v2 terminal casts."])
+lines.extend([
+    "", "Retained evidence:",
+    f"- Telemetry MCAPs: {len(list(path.glob('*.mcap')))}",
+    f"- Event MCAPs: {len(list(path.glob('events/*.mcap')))}",
+    f"- Replay PNGs: {len(list(path.glob('screenshots/**/*.png')))}",
+    f"- Terminal casts: {len(list(path.glob('**/*.cast')))}",
+    "- Command logs, exit metadata, and available Compose diagnostics",
+])
 text = "\n".join(lines) + "\n"
 path.mkdir(parents=True, exist_ok=True)
 (path / "summary.md").write_text(text)
