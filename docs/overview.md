@@ -28,5 +28,5 @@ The benchmark that defines "working":
 - The real-robot backend is a named stub (`G1LocoClientBackend`). It raises `NotImplementedError`. Do not implement it unless the user asks to leave the simulator. What that step would take is in [roadmap.md](roadmap.md#then-a-real-g1-edu).
 - Navigation is a corridor follower. No map, no localisation, no goal input. A turn or a junction is not handled.
 - The walking policy is G1-only. Other robot names make `loco` exit.
-- ANYbotics Foxglove layouts do not apply. They subscribe to ANYmal cameras, diagnostics, and navigation topics this bridge does not publish. The layout for this connection is `foxglove/g1-layout.json`.
+- Foxglove layouts for other robots may subscribe to cameras, diagnostics, and navigation topics this bridge does not publish. The layout for this connection is `foxglove/g1-layout.json`.
 - No git remote. Do not push.

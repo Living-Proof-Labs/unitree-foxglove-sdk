@@ -66,7 +66,7 @@ Each item is settled. The short reason is the failure mode, not a lab notebook. 
 
 **The G1 mesh is an HTTP URDF layer, not a TF tree of every link.** The bridge serves `g1_29dof.urdf` and `meshes/` on port 8770 with `Access-Control-Allow-Origin: *`, which the page at `app.foxglove.dev` needs to fetch localhost. Mesh paths in the URDF are relative, so one directory is enough. `/tf` carries only `world → pelvis`. Joint motion comes from `/robot/joint_states` with control mode `jointStates`. The URDF's movable joint names match `G1.joint_names` in order. A partial joint-state message does not merge with the previous one.
 
-**ANYbotics layouts are the wrong layout for this connection.** They stay blank or show "topic does not exist" while the WebSocket is healthy. The topic list in the sidebar is the connection check.
+**Layouts for other robots do not match this connection.** They stay blank or show "topic does not exist" while the WebSocket is healthy. The topic list in the sidebar is the connection check.
 
 **Quaternion order differs.** Unitree IMU quaternions are w, x, y, z. Foxglove orientation is x, y, z, w. `convert.py` swaps them. Do not "fix" one side to match the other.
 

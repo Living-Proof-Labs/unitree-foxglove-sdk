@@ -1,8 +1,8 @@
 # Unitree G1 in simulation, driven from Foxglove
 
-## Why an ANYbotics repo has a Unitree robot in it
+## Why this project uses a Unitree robot
 
-This is a Devex proof of concept. It is not a Unitree product effort. The Unitree G1 is here because it is a convenient stand-in: Unitree publishes a MuJoCo simulator that uses the same DDS topics as the real robot, plus a pretrained walking policy, so anyone can run a legged robot from `task up` with no hardware and no license. None of the patterns below depend on the robot. They are what we would like to evaluate for our own robots.
+This is a Devex proof of concept. It is not a Unitree product effort. The Unitree G1 is here because it is a convenient stand-in: Unitree publishes a MuJoCo simulator that uses the same DDS topics as the real robot, plus a pretrained walking policy, so anyone can run a legged robot from `task up` with no hardware and no license. None of the patterns below depend on the robot. They can also be evaluated with other robots.
 
 The project demonstrates three things.
 
@@ -19,7 +19,7 @@ The project demonstrates three things.
 
 The result is that a fall is visible in Foxglove within seconds, with the full-rate data from around it, while the hours of uneventful walking never leave the robot. Upload cost scales with the number of events, not with robot uptime. Because events are plain files with metadata, whatever writes them (health today, an operator button or a mission step later) plugs into the same trigger.
 
-The recordings from this trial are on device [g1-sim](https://app.foxglove.dev/anybotics/p/prj_0edsooXR5WbJ2CWJ/devices/dev_0edswdPBDBYO4uxe) in the Experimental project of the ANYbotics Foxglove org. Event files there are imported. The minute-long telemetry files are listed beside them, waiting for an event to pull in the minutes that overlap it.
+With a device token configured, recordings appear on the associated device in your Foxglove organization. Event files are imported automatically; minute-long telemetry files remain listed until an event requests the overlapping recordings.
 
 Agent-oriented docs (architecture, decisions, interfaces) are in [`docs/README.md`](docs/README.md). Start here to run the robot.
 
@@ -65,7 +65,7 @@ Open connection, then **Foxglove WebSocket**, and leave the address at `ws://loc
 
 With `FOXGLOVE_DEVICE_TOKEN` in `.env`, `task up` starts the gateway beside the local server. The bridge log prints `remote access connected`. Then:
 
-1. On the phone, open [g1-sim](https://app.foxglove.dev/anybotics/p/prj_0edsooXR5WbJ2CWJ/devices/dev_0edswdPBDBYO4uxe) in the browser, signed in to the ANYbotics Foxglove org, and choose to visualize it live. Or use Open connection, **Remote Access**, `g1-sim`.
+1. On the phone, sign in to your Foxglove organization in the browser, open the device associated with your token, and choose to visualize it live. Or use Open connection, **Remote Access**, and select that device (named `g1-sim` by default).
 2. When you can see the robot, import `foxglove/mobile-field-operator.json` and select it. It is two full-width color bars, health and navigation, then the four stand-up buttons, Pause, Resume, and a large Teleop. The bars are the only subscriptions: one word each, painted across the panel. There is still no robot, no scan, and no joint states.
 3. When you cannot see the robot, import `foxglove/g1-mobile-layout.json` instead. It adds the robot, following the pelvis, and a health strip. It still skips the lidar fan, the plots, and the raw messages. Damp, reset, and the hallway buttons stay on the full layout.
 4. `foxglove/g1-remote-layout.json` is the full layout with the URDF loaded as `package://g1_description/g1_29dof.urdf`, which the gateway serves. Use it on a desktop that is not this machine. The phone cannot reach `http://localhost:8770`, so the local layout shows everything except the robot model there.
@@ -135,7 +135,7 @@ That run passes when the last `/nav/state` is `arrived`, the base never dropped 
 | `/world/scene` | SceneUpdate | the hallway walls, once a second; absent in the open world |
 | `/nav/state` | JSON | navigator state, commanded `vx`/`wz`, clearance ahead, left, right, and heading |
 
-A run in which the robot fell also gets a tiny file `recordings/events/g1-<UTC>-incident-<UTC>.mcap`. A bump that recovers, without falling, gets `g1-<UTC>-degraded-<UTC>.mcap` once health has stayed out of `degraded` for 3 s. Each file holds the time window as metadata and as two messages, so Foxglove dates it on that window rather than 1970. With a device token in `.env` (see `.env.example`), `task up` runs Foxlet and those files upload to [g1-sim](https://app.foxglove.dev/anybotics/p/prj_0edsooXR5WbJ2CWJ/devices/dev_0edswdPBDBYO4uxe) on their own. This repo does not call the Foxglove API. Telemetry rolls every 60 s and stays on the device until an event asks for the minutes that overlap it. See [docs/health.md](docs/health.md#incident-events).
+A run in which the robot fell also gets a tiny file `recordings/events/g1-<UTC>-incident-<UTC>.mcap`. A bump that recovers, without falling, gets `g1-<UTC>-degraded-<UTC>.mcap` once health has stayed out of `degraded` for 3 s. Each file holds the time window as metadata and as two messages, so Foxglove dates it on that window rather than 1970. With a device token in `.env` (see `.env.example`), `task up` runs Foxlet and those files upload to the device associated with your token automatically. This repo does not call the Foxglove API. Telemetry rolls every 60 s and stays on the device until an event asks for the minutes that overlap it. See [docs/health.md](docs/health.md#incident-events).
 
 Open the MCAP in Foxglove like any local file to review a run next to what was asked of the robot. The URDF layer needs the bridge running for the model; the plots and raw messages do not.
 
