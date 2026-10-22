@@ -20,6 +20,9 @@ jobs:
     name: ${{ matrix.scenario }} acceptance
     runs-on: ubuntu-24.04
     timeout-minutes: 20
+    permissions:
+      contents: read
+      checks: write
     strategy:
       fail-fast: false
       matrix:
@@ -40,6 +43,13 @@ jobs:
         env:
           CHECK_TASK: ${{ matrix.task }}
         run: task "$CHECK_TASK"
+      - name: Publish acceptance test results
+        if: ${{ !cancelled() }}
+        uses: ./.github/actions/publish-tests
+        with:
+          suite: ${{ matrix.run }}
+          check-name: ${{ matrix.scenario }} test results
+          check-run: ${{ github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository }}
       - name: Summarize simulation evidence
         if: always()
         env:

@@ -1,0 +1,34 @@
+name: Publish readable test results
+description: Convert Task results to JUnit and publish GitHub Checks and an Actions summary
+inputs:
+  suite:
+    description: Artifact suite (unit, e2e-fall, e2e, e2e-hallway)
+    required: true
+  check-name:
+    description: Stable name for the test-results check across commits
+    required: true
+  check-run:
+    description: Disable check writes for read-only fork tokens; retain the job summary
+    default: 'true'
+runs:
+  using: composite
+  steps:
+    - name: Prepare JUnit results through Task
+      shell: bash
+      env:
+        REPORT_SUITE: ${{ inputs.suite }}
+      run: task artifacts:tests SUITE="$REPORT_SUITE"
+    - name: Publish test analysis
+      # v2.25.0
+      uses: EnricoMi/publish-unit-test-result-action@7622c5bf3d112a72ab4fa3951c2aa5723d8ab92d
+      with:
+        files: artifacts/${{ inputs.suite }}/test-results.xml
+        check_name: ${{ inputs.check-name }}
+        check_run: ${{ inputs.check-run }}
+        check_run_annotations_branch: '*'
+        comment_mode: 'off'
+        job_summary: 'true'
+        compare_to_earlier_commit: ${{ inputs.check-run }}
+        action_fail: 'true'
+        action_fail_on_inconclusive: 'true'
+        json_file: artifacts/${{ inputs.suite }}/published-results.json

@@ -18,6 +18,9 @@ jobs:
     name: Unit tests and lint
     runs-on: ubuntu-24.04
     timeout-minutes: 20
+    permissions:
+      contents: read
+      checks: write
     steps:
       - uses: actions/checkout@v4
       - name: Install Task 3.48.0
@@ -26,6 +29,13 @@ jobs:
           echo "$RUNNER_TEMP/bin" >> "$GITHUB_PATH"
       - name: Build, lint, and test through Task
         run: task ci:unit
+      - name: Publish unit test results
+        if: ${{ !cancelled() }}
+        uses: ./.github/actions/publish-tests
+        with:
+          suite: unit
+          check-name: Unit test results
+          check-run: ${{ github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository }}
       - name: Upload test reports, logs, and terminal casts
         if: always()
         uses: actions/upload-artifact@v4
@@ -39,6 +49,9 @@ jobs:
     name: Deliberate fall and incident recording
     runs-on: ubuntu-24.04
     timeout-minutes: 20
+    permissions:
+      contents: read
+      checks: write
     steps:
       - uses: actions/checkout@v4
       - name: Install Task 3.48.0
@@ -47,6 +60,13 @@ jobs:
           echo "$RUNNER_TEMP/bin" >> "$GITHUB_PATH"
       - name: Check incident recording through Task
         run: task ci:fall
+      - name: Publish incident test results
+        if: ${{ !cancelled() }}
+        uses: ./.github/actions/publish-tests
+        with:
+          suite: e2e-fall
+          check-name: Incident test results
+          check-run: ${{ github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository }}
       - name: Summarize simulation evidence
         if: always()
         run: task artifacts:summary RUN=e2e-fall >> "$GITHUB_STEP_SUMMARY"
