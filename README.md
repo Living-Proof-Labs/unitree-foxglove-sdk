@@ -156,6 +156,18 @@ invocations also reuse the existing image.
 
 `task e2e` has two phases. The walk passes when the base travelled at least 0.3 m and never dropped below 0.5 m, and health never reported `incident`. A fall there fails it; open that MCAP in Foxglove to see why. The second phase releases the robot without the walking policy and passes when health reaches `incident` and one small file appears under `recordings/events/`. The simulator's real-time factor should read `1.00`.
 
+## CI and review artifacts
+
+GitHub Actions runs the same developer tasks: `task ci:unit` for unit tests and
+lint, and `task ci:fall` for deliberate-fall incident recording. A separate
+**Locomotion benchmarks** workflow runs `task ci:walk` and `task ci:hallway`,
+keeping documented gait failures visible.
+
+Download a run's artifacts for JUnit reports, telemetry and event MCAPs, replay
+screenshots, command/Compose logs, and asciinema terminal casts. Artifacts are
+retained for 14 days and uploaded even on failure. See
+[CI details and local reproduction](docs/operations.md#continuous-integration).
+
 ## Go2
 
 `UNITREE_ROBOT=go2 task sim` opens the quadruped instead. `unitree-stand` sends its stand-up trajectory over `rt/lowcmd`. The walking policy is G1-only, so `loco` exits for other robots.

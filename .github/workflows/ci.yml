@@ -34,3 +34,34 @@ jobs:
           path: artifacts/
           if-no-files-found: warn
           retention-days: 14
+
+  incident:
+    name: Deliberate fall and incident recording
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Task 3.48.0
+        run: |
+          bash scripts/install-task.sh "$RUNNER_TEMP/bin"
+          echo "$RUNNER_TEMP/bin" >> "$GITHUB_PATH"
+      - name: Check incident recording through Task
+        run: task ci:fall
+      - name: Summarize simulation evidence
+        if: always()
+        run: task artifacts:summary RUN=e2e-fall >> "$GITHUB_STEP_SUMMARY"
+      - name: Upload MCAPs, replay screenshots, logs, and terminal casts
+        if: always()
+        id: upload
+        uses: actions/upload-artifact@v4
+        with:
+          name: incident-${{ github.run_id }}-${{ github.run_attempt }}
+          path: artifacts/e2e-fall/
+          if-no-files-found: warn
+          retention-days: 14
+      - name: Link downloadable evidence
+        if: always()
+        env:
+          ARTIFACT_URL: ${{ steps.upload.outputs.artifact-url }}
+        run: |
+          echo "[Download evidence]($ARTIFACT_URL)" >> "$GITHUB_STEP_SUMMARY"
