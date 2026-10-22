@@ -1,0 +1,177 @@
+{
+  "configById": {
+    "3D!g1": {
+      "cameraState": {
+        "perspective": true,
+        "distance": 2.6,
+        "phi": 68,
+        "thetaOffset": 35,
+        "targetOffset": [0, 0, 0],
+        "target": [0, 0, 0],
+        "targetOrientation": [0, 0, 0, 1],
+        "fovy": 50,
+        "near": 0.05,
+        "far": 100
+      },
+      "followMode": "follow-pose",
+      "followTf": "pelvis",
+      "scene": {
+        "enableStats": false,
+        "backgroundColor": "#1b1b1f",
+        "meshUpAxis": "z_up",
+        "transforms": { "visible": false }
+      },
+      "topics": {
+        "/world/scene": { "visible": true, "showOutlines": false }
+      },
+      "layers": {
+        "grid": {
+          "layerId": "foxglove.Grid",
+          "visible": true,
+          "frameId": "world",
+          "size": 8,
+          "divisions": 8,
+          "lineWidth": 1,
+          "color": "#3a3a44"
+        },
+        "g1-urdf": {
+          "layerId": "foxglove.Urdf",
+          "instanceId": "g1-urdf",
+          "label": "G1",
+          "visible": true,
+          "sourceType": "url",
+          "url": "package://g1_description/g1_29dof.urdf",
+          "filePath": "",
+          "parameter": "",
+          "topic": "",
+          "framePrefix": "",
+          "controlMode": "jointStates",
+          "jointStatesTopic": "/robot/joint_states",
+          "displayMode": "auto",
+          "fallbackColor": "#d0d0d0",
+          "opacity": 1,
+          "showOutlines": false,
+          "showAxis": false,
+          "axisScale": 1,
+          "order": 1
+        }
+      }
+    },
+    "Indicator!health": {
+      "path": "/health/state.state",
+      "style": "background",
+      "fallbackColor": "#607d8b",
+      "fallbackLabel": "health: no data",
+      "rules": [
+        { "operator": "=", "rawValue": "incident", "color": "#e53935", "label": "INCIDENT" },
+        { "operator": "=", "rawValue": "degraded", "color": "#f9a825", "label": "degraded" },
+        { "operator": "=", "rawValue": "nominal", "color": "#43a047", "label": "nominal" },
+        { "operator": "=", "rawValue": "inactive", "color": "#607d8b", "label": "inactive" },
+        { "operator": "=", "rawValue": "offline", "color": "#424242", "label": "offline" }
+      ]
+    },
+    "CallService!stand": {
+      "serviceName": "loco/stand",
+      "requestPayload": "{}",
+      "layout": "vertical",
+      "editingMode": false,
+      "buttonText": "1  Stand",
+      "buttonTooltip": "Ramp every joint to the default pose, still hanging",
+      "buttonColor": "#3f51b5"
+    },
+    "CallService!start": {
+      "serviceName": "loco/start",
+      "requestPayload": "{}",
+      "layout": "vertical",
+      "editingMode": false,
+      "buttonText": "2  Start",
+      "buttonTooltip": "Walking policy at zero velocity, still hanging",
+      "buttonColor": "#43a047"
+    },
+    "CallService!band_lower": {
+      "serviceName": "sim/band_lower",
+      "requestPayload": "{}",
+      "layout": "vertical",
+      "editingMode": false,
+      "buttonText": "3  Lower",
+      "buttonTooltip": "Tap seven times. Feet touch at about the seventh",
+      "buttonColor": "#607d8b"
+    },
+    "CallService!band_release": {
+      "serviceName": "sim/band_release",
+      "requestPayload": "{}",
+      "layout": "vertical",
+      "editingMode": false,
+      "buttonText": "4  Release",
+      "buttonTooltip": "Rope off. The robot stands, then drive with Teleop",
+      "buttonColor": "#43a047"
+    },
+    "CallService!pause": {
+      "serviceName": "loco/pause",
+      "requestPayload": "{}",
+      "layout": "vertical",
+      "editingMode": false,
+      "buttonText": "Pause",
+      "buttonTooltip": "Balance in place and ignore Teleop",
+      "buttonColor": "#f9a825"
+    },
+    "CallService!resume": {
+      "serviceName": "loco/resume",
+      "requestPayload": "{}",
+      "layout": "vertical",
+      "editingMode": false,
+      "buttonText": "Resume",
+      "buttonTooltip": "Teleop drives again",
+      "buttonColor": "#43a047"
+    },
+    "Teleop!cmd_vel": {
+      "topic": "/cmd_vel",
+      "publishRate": 5,
+      "upButton": { "field": "linear-x", "value": 0.4 },
+      "downButton": { "field": "linear-x", "value": -0.4 },
+      "leftButton": { "field": "angular-z", "value": 0.6 },
+      "rightButton": { "field": "angular-z", "value": -0.6 }
+    }
+  },
+  "globalVariables": {},
+  "userNodes": {},
+  "playbackConfig": { "speed": 1 },
+  "layout": {
+    "direction": "column",
+    "splitPercentage": 7,
+    "first": "Indicator!health",
+    "second": {
+      "direction": "column",
+      "splitPercentage": 52,
+      "first": "3D!g1",
+      "second": {
+        "direction": "column",
+        "splitPercentage": 58,
+        "first": {
+          "direction": "column",
+          "splitPercentage": 34,
+          "first": {
+            "direction": "row",
+            "first": "CallService!stand",
+            "second": "CallService!start"
+          },
+          "second": {
+            "direction": "column",
+            "splitPercentage": 50,
+            "first": {
+              "direction": "row",
+              "first": "CallService!band_lower",
+              "second": "CallService!band_release"
+            },
+            "second": {
+              "direction": "row",
+              "first": "CallService!pause",
+              "second": "CallService!resume"
+            }
+          }
+        },
+        "second": "Teleop!cmd_vel"
+      }
+    }
+  }
+}

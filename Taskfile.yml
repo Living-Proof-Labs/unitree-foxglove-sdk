@@ -1,0 +1,67 @@
+version: "3"
+
+vars:
+  HOST_UID:
+    sh: id -u
+  HOST_GID:
+    sh: id -g
+  FOXGLOVE_URL: "https://app.foxglove.dev/~/view?ds=foxglove-websocket&ds.url=ws%3A%2F%2Flocalhost%3A8765"
+
+env:
+  UID: "{{.HOST_UID}}"
+  GID: "{{.HOST_GID}}"
+
+tasks:
+  build:
+    desc: Build the simulator, bridge, and loco image
+    cmds:
+      - docker compose build
+
+  up:
+    desc: G1 in MuJoCo with the Foxglove bridge and the walking policy
+    deps: [build]
+    cmds:
+      - bash scripts/up.sh
+
+  hallway:
+    desc: Same as up, in a closed hallway (WORLD=hallway10 or hallway20)
+    deps: [build]
+    env:
+      UNITREE_WORLD: '{{.WORLD | default "hallway10"}}'
+    cmds:
+      - bash scripts/up.sh
+
+  sim:
+    desc: Only the MuJoCo window, no bridge or policy
+    deps: [build]
+    cmds:
+      - docker compose up sim
+
+  foxglove:
+    desc: Open the Foxglove web app connected to ws://localhost:8765
+    cmds:
+      - 'echo "Import foxglove/g1-layout.json once via Layouts > Import."'
+      - xdg-open "{{.FOXGLOVE_URL}}"
+
+  test:
+    desc: Run unit tests inside the image
+    deps: [build]
+    cmds:
+      - docker compose run --rm --no-deps --entrypoint pytest sim -p no:cacheprovider tests
+
+  e2e:
+    desc: Headless walk that must stay up, then a fall that must write an event MCAP
+    cmds:
+      - bash scripts/e2e.sh
+
+  e2e-hallway:
+    desc: Headless navigator must reach the end of the hallway (WORLD=hallway10 or hallway20)
+    env:
+      E2E_WORLD: '{{.WORLD | default "hallway10"}}'
+    cmds:
+      - bash scripts/e2e_hallway.sh
+
+  down:
+    desc: Stop every service
+    cmds:
+      - docker compose --profile foxlet down --remove-orphans

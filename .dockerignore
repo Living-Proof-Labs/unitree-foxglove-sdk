@@ -1,0 +1,18 @@
+.venv
+.env
+.git
+.ruff_cache
+.pytest_cache
+**/__pycache__
+**/*.pyc
+recordings
+*.mcap
+*.plan.md
+# unitree_rl_gym is 145 MB; the image needs only the pretrained G1 policy and the
+# G1 URDF with its meshes for the Foxglove 3D panel.
+third_party/unitree_rl_gym/**
+!third_party/unitree_rl_gym/LICENSE
+!third_party/unitree_rl_gym/deploy/pre_train/g1/motion.pt
+!third_party/unitree_rl_gym/deploy/deploy_real/configs/g1.yaml
+!third_party/unitree_rl_gym/resources/robots/g1_description/g1_29dof.urdf
+!third_party/unitree_rl_gym/resources/robots/g1_description/meshes/**

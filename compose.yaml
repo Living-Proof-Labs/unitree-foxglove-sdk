@@ -1,0 +1,86 @@
+# Host networking keeps CycloneDDS on the loopback interface (domain 1), which is
+# what the Unitree simulator publishes on. A bridge network would drop that traffic.
+x-app: &app
+  image: unitree-foxglove:local
+  build: .
+  network_mode: host
+  user: "${UID:?set UID to the host user id}:${GID:?set GID to the host group id}"
+  env_file: sim.env
+  init: true
+
+services:
+  # MuJoCo with the Unitree DDS bridge: rt/lowstate out, rt/lowcmd in.
+  # UNITREE_WORLD=hallway10 or hallway20 walls the floor in; both services read it.
+  sim:
+    <<: *app
+    environment:
+      DISPLAY: ${DISPLAY:-:1}
+      UNITREE_ROBOT: ${UNITREE_ROBOT:-g1}
+      UNITREE_DOMAIN_ID: ${UNITREE_DOMAIN_ID:-1}
+      UNITREE_INTERFACE: ${UNITREE_INTERFACE:-lo}
+      UNITREE_HEADLESS: ${UNITREE_HEADLESS:-0}
+      UNITREE_DURATION: ${UNITREE_DURATION:-0}
+      UNITREE_WORLD: ${UNITREE_WORLD:-open}
+      MUJOCO_GL: glfw
+    volumes:
+      - /tmp/.X11-unix:/tmp/.X11-unix
+    command: ["unitree-sim"]
+
+  # Foxglove WebSocket on 8765 plus MCAP recording; accepts Teleop and services.
+  # Serves the G1 URDF and meshes on 8770 for the 3D panel.
+  bridge:
+    <<: *app
+    depends_on:
+      - sim
+    environment:
+      UNITREE_ROBOT: ${UNITREE_ROBOT:-g1}
+      UNITREE_DOMAIN_ID: ${UNITREE_DOMAIN_ID:-1}
+      UNITREE_INTERFACE: ${UNITREE_INTERFACE:-lo}
+      UNITREE_RECORD_DURATION: ${UNITREE_RECORD_DURATION:-0}
+      UNITREE_WORLD: ${UNITREE_WORLD:-open}
+      RECORDINGS_DIR: ${RECORDINGS_DIR:-/data/recordings}
+      FOXGLOVE_HOST: ${FOXGLOVE_HOST:-127.0.0.1}
+      FOXGLOVE_PORT: ${FOXGLOVE_PORT:-8765}
+      ASSETS_PORT: ${ASSETS_PORT:-8770}
+      UNITREE_RECORD_ROLL_S: ${UNITREE_RECORD_ROLL_S:-60}
+      # Non-empty starts the Remote Access gateway beside the local WebSocket.
+      FOXGLOVE_DEVICE_TOKEN: ${FOXGLOVE_DEVICE_TOKEN:-}
+    volumes:
+      - ./recordings:/data/recordings
+    command: ["unitree-bridge"]
+
+  # Stand-in for the G1's onboard locomotion: Unitree's pretrained walking policy.
+  loco:
+    <<: *app
+    depends_on:
+      - sim
+    environment:
+      UNITREE_ROBOT: ${UNITREE_ROBOT:-g1}
+      UNITREE_DOMAIN_ID: ${UNITREE_DOMAIN_ID:-1}
+      UNITREE_INTERFACE: ${UNITREE_INTERFACE:-lo}
+    command: ["unitree-loco"]
+
+  # Uploads recordings/events as soon as each file is closed. Telemetry stays
+  # listed on the device until an event asks for the files that overlap it.
+  # One Foxlet per device token. The e2e project does not enable this profile.
+  foxlet:
+    profiles: ["foxlet"]
+    image: us-central1-docker.pkg.dev/foxglove-images/images/agent:1.5.0
+    network_mode: host
+    restart: unless-stopped
+    environment:
+      FOXGLOVE_DEVICE_TOKEN: ${FOXGLOVE_DEVICE_TOKEN:-}
+      # Required when the token is not already tied to a device. Foxlet creates
+      # the device on first start. A device-linked token can leave this empty.
+      DEVICE_NAME: ${FOXGLOVE_DEVICE_NAME:-g1-sim}
+      STORAGE_ROOT: /storage
+      WATCH_INCLUDE_SUFFIXES: .mcap
+      WATCH_AUTO_IMPORT_PATTERN: "**/events/**/*.mcap"
+      FOXGLOVE_LOG_OUTPUT: text
+      PRIMARY_SITE_MODE: hosted
+    volumes:
+      - ./recordings:/storage
+      - foxlet-index:/index
+
+volumes:
+  foxlet-index:

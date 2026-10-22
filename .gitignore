@@ -1,0 +1,29 @@
+# Secrets and local env (copy from .env.example)
+.env
+
+# Python / uv
+.venv/
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+.eggs/
+dist/
+build/
+.mypy_cache/
+.ruff_cache/
+.pytest_cache/
+.uv/
+
+# Native CycloneDDS build used on hosts without Docker (see local trial notes)
+.deps/
+
+# Recordings: bags are not source; review them in Foxglove
+recordings/
+*.mcap
+
+# Editor / OS / scratch
+.DS_Store
+*.plan.md
+*.swp
+*~
