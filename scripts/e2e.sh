@@ -62,7 +62,8 @@ compose run --rm --no-deps --entrypoint python bridge -m unitree_foxglove.ws_cli
   --band-lowers "${E2E_BAND_LOWERS:-7}" \
   --speed "${E2E_SPEED:-0.4}" \
   --seconds "${E2E_SECONDS:-4}" \
-  --settle "${E2E_SETTLE:-3}"
+  --settle "${E2E_SETTLE:-3}" \
+  --pause-seconds "${E2E_PAUSE_SECONDS:-3}"
 
 sleep 1
 compose logs sim | grep "real-time" | tail -n 3
