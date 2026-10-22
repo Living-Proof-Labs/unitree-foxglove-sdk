@@ -139,7 +139,7 @@ A shell with `UNITREE_DOMAIN_ID` exported will leak into local pytest through `S
 
 `docker compose build` is the image `unitree-foxglove:local`. It is large because of the G1 meshes and the Python environment. Pruning images is safe; the next `task up` rebuilds. Do not prune while the user is mid-run unless they ask.
 
-Recordings land in `recordings/` on the host. They are gitignored. The latest file can be tens or hundreds of megabytes after a long Teleop session.
+Recordings land in `recordings/` on the host. They are gitignored. The latest file can be tens or hundreds of megabytes after a long Teleop session. `scripts/up.sh` creates that directory as the current user before Compose starts; if Docker creates a missing bind mount it is owned by root and the bridge exits with `PermissionError` writing the MCAP.
 
 ## Changing the system
 
