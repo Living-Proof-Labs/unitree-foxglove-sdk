@@ -211,3 +211,26 @@ if a forced shutdown leaves an unfinished recording. Replay writes the parsing
 error into `replay.json`, renders other valid files, and returns a failure rather
 than silently discarding the bad recording. This diagnostic coverage does not
 claim to resolve the underlying intermittent stall.
+
+### Read test results in Actions
+
+Each job now publishes a named test-results check as well as its evidence
+artifact. Open the workflow run's **Summary** for counts and durations, or open
+**Unit test results**, **Incident test results**, **walk test results**, or
+**hallway test results** in the commit/PR checks for individual test annotations
+and failure details. Unit reports retain pytest's individual cases. Simulation
+reports distinguish image build, acceptance, and replay as three named stages;
+a failed acceptance check can therefore show a successful evidence-rendering
+stage. Missing results are errors or explicitly unstarted stages, never empty
+successful suites.
+
+The publisher enables comparison with earlier reported commits when a baseline
+is available. The first report establishes that baseline. Raw JUnit XML and the
+publisher's JSON result remain in the artifact for further analysis. Fork PRs
+with read-only tokens still get an Actions summary and artifacts; publishing a
+commit check is disabled for those runs.
+
+For local report generation after a run, use
+`task artifacts:tests SUITE=unit` (or `e2e-fall`, `e2e`, `e2e-hallway`). This
+creates `artifacts/<suite>/test-results.xml` from the same retained results used
+by the Actions publisher.

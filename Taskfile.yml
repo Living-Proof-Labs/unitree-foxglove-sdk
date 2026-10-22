@@ -54,7 +54,7 @@ tasks:
     deps: [image-ready]
     cmds:
       - mkdir -p artifacts/unit
-      - docker compose run --rm --no-deps -v "{{.ROOT_DIR}}/artifacts/unit:/reports" --entrypoint pytest sim -p no:cacheprovider tests --junitxml=/reports/junit.xml
+      - docker compose run --rm --no-deps -v "{{.ROOT_DIR}}/artifacts/unit:/reports" --entrypoint pytest sim -p no:cacheprovider tests -o junit_family=xunit1 --junitxml=/reports/junit.xml
 
   lint:
     desc: Check Python source and tests with Ruff using the existing image
@@ -65,6 +65,7 @@ tasks:
   ci:unit:
     desc: Build, run unit tests, and lint with logs and a terminal cast
     cmds:
+      - rm -f artifacts/unit/junit.xml
       - python3 scripts/capture.py artifacts/unit -- task test:with-build
       - python3 scripts/capture.py artifacts/lint -- task lint
 
@@ -127,6 +128,15 @@ tasks:
       - rm -rf "artifacts/{{.RUN}}/screenshots" "artifacts/{{.RUN}}/events"
       - cp -a "recordings/{{.RUN}}/." "artifacts/{{.RUN}}/"
       - docker compose run --rm --no-deps -e MUJOCO_GL=osmesa -v "{{.ROOT_DIR}}/artifacts/{{.RUN}}:/evidence" --entrypoint python sim -m unitree_foxglove.render_mcap /evidence --world "{{.WORLD | default "open"}}"
+
+  artifacts:tests:
+    desc: Generate publishable JUnit results (SUITE=unit, e2e-fall, e2e, e2e-hallway)
+    requires:
+      vars: [SUITE]
+    env:
+      PYTHONPATH: '{{.ROOT_DIR}}/src'
+    cmds:
+      - python3 -m unitree_foxglove.test_report "{{.SUITE}}"
 
   artifacts:summary:
     desc: Summarize a simulation artifact directory (RUN)
