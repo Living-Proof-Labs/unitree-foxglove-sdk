@@ -18,6 +18,7 @@ shows the same world the simulator loaded.
 
 from __future__ import annotations
 
+import faulthandler
 import json
 import os
 import signal
@@ -423,6 +424,10 @@ def build_services(
 
 def main() -> None:
     """Serve and record until SIGTERM or the optional duration."""
+    # Preserve thread stacks when a native DDS/SDK call prevents normal shutdown.
+    faulthandler.enable()
+    faulthandler.register(signal.SIGUSR1, all_threads=True)
+    faulthandler.dump_traceback_later(30)
     domain_id = int(os.environ.get("UNITREE_DOMAIN_ID", "1"))
     interface = os.environ.get("UNITREE_INTERFACE", "lo")
     duration_s = float(os.environ.get("UNITREE_RECORD_DURATION", "0"))
@@ -525,11 +530,12 @@ def main() -> None:
                 if not _has(low_state, "motor_state"):
                     _log_health(health.tick(time.time_ns()), log_lock, nav, loco)
                     continue
-                if not saw_sample:
-                    saw_sample = True
-                    print("first sample received", flush=True)
                 with log_lock:
                     nanoseconds = _log_sample(low_state, sport_state, profile)
+                if not saw_sample:
+                    saw_sample = True
+                    faulthandler.cancel_dump_traceback_later()
+                    print("first sample received", flush=True)
                 observation = observation_from_state(
                     low_state, sport_state, loco, sim.band_enabled, nanoseconds
                 )

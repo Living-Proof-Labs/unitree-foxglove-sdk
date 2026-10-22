@@ -15,6 +15,10 @@ for label, file in (("Test", path / "run.json"), ("Replay rendering", path / "re
 report = path / "replay.json"
 if report.exists():
     for recording in json.loads(report.read_text()):
+        if "error" in recording:
+            lines.extend(["", f"Could not replay `{recording['recording']}`: "
+                          f"{recording['error']}"])
+            continue
         lines.extend([
             "", f"Recording: `{recording['recording']}`",
             f"- Duration: {recording['duration_s']:.1f} seconds",

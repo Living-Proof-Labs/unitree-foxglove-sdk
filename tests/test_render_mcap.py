@@ -9,6 +9,7 @@ import foxglove
 import numpy as np
 import pytest
 from foxglove.messages import JointState, JointStates, Pose, PoseInFrame, Quaternion, Vector3
+from mcap.exceptions import McapError
 
 from unitree_foxglove.convert import TOPIC_BASE_POSE, TOPIC_JOINT_STATES
 from unitree_foxglove.render_mcap import read_frames, write_png
@@ -71,3 +72,10 @@ def test_png_has_valid_checksums_and_exact_pixel_data(tmp_path: Path) -> None:
         offset += 12 + length
     assert struct.unpack("!2I5B", chunks[b"IHDR"]) == (2, 2, 8, 2, 0, 0, 0)
     assert zlib.decompress(chunks[b"IDAT"]) == b"".join(b"\0" + row.tobytes() for row in pixels)
+
+
+def test_replay_rejects_an_unfinished_recording(tmp_path: Path) -> None:
+    path = tmp_path / "interrupted.mcap"
+    path.write_bytes(b"\x89MCAP0\r\n" + b"\xff" * 32)
+    with pytest.raises(McapError):
+        read_frames(path)

@@ -40,6 +40,10 @@ compose() {
 cleanup() {
   local result=$?
   trap - EXIT
+  # A stuck native SDK call may ignore SIGTERM; retain Python thread stacks first.
+  if [[ "$result" -ne 0 ]]; then
+    compose kill -s SIGUSR1 bridge >/dev/null 2>&1 || true
+  fi
   # Close MCAPs and collect diagnostics before removing containers, even on failure.
   compose stop bridge >/dev/null 2>&1 || true
   compose logs --no-color > "$output_dir/compose.log" 2>&1 || true

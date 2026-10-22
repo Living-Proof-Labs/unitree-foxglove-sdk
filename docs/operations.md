@@ -201,3 +201,13 @@ health/navigation transitions, and minimum height. Rendering happens after the
 simulator has stopped, so it cannot affect control-loop timing. Hallway walls
 are translucent in these review images. To render an existing local run:
 `task artifacts:render RUN=e2e-hallway WORLD=hallway10`.
+
+CI also exposed an intermittent bridge startup stall before WebSocket services
+are advertised ([issue #5](https://github.com/Living-Proof-Labs/unitree-foxglove-sdk/issues/5)).
+Readiness now requires the first successfully logged sample. The bridge dumps
+thread stacks if startup stalls for 30 seconds; failed e2e cleanup requests
+another dump with `SIGUSR1` before shutdown. Raw MCAPs and logs are still uploaded
+if a forced shutdown leaves an unfinished recording. Replay writes the parsing
+error into `replay.json`, renders other valid files, and returns a failure rather
+than silently discarding the bad recording. This diagnostic coverage does not
+claim to resolve the underlying intermittent stall.

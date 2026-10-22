@@ -11,6 +11,7 @@ from dataclasses import dataclass
 from pathlib import Path
 
 import numpy as np
+from mcap.exceptions import McapError
 from mcap.reader import make_reader
 
 from unitree_foxglove.check_mcap import decode_payload
@@ -104,7 +105,11 @@ def main() -> None:
     reports = []
     with mujoco.Renderer(model, height=480, width=640) as renderer:
         for path in files:
-            frames, report = read_frames(path)
+            try:
+                frames, report = read_frames(path)
+            except (McapError, ValueError, EOFError) as exc:
+                reports.append({"recording": path.name, "error": str(exc)})
+                continue
             selected = {
                 "start": 0, "midpoint": len(frames) // 2, "end": len(frames) - 1,
                 "lowest": min(range(len(frames)), key=lambda i: frames[i].position[2]),
@@ -129,7 +134,13 @@ def main() -> None:
                 report["screenshots"][label] = {"log_time_ns": frame.time_ns, "frame": index}
             reports.append(report)
     (args.directory / "replay.json").write_text(json.dumps(reports, indent=2) + "\n")
-    print(f"Rendered {len(reports)} recording(s) into {args.directory / 'screenshots'}")
+    errors = [report for report in reports if "error" in report]
+    print(f"Rendered {len(reports) - len(errors)} recording(s) into "
+          f"{args.directory / 'screenshots'}")
+    for report in errors:
+        print(f"Could not replay {report['recording']}: {report['error']}")
+    if errors:
+        raise SystemExit(1)
 
 
 if __name__ == "__main__":
