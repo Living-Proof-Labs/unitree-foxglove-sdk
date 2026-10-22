@@ -4,7 +4,6 @@ version = "0.1.0"
 description = "Run the Unitree MuJoCo simulator locally and record/stream its DDS state to Foxglove (MCAP + live)"
 readme = "README.md"
 license = { text = "MIT" }
-authors = [{ name = "ANYbotics" }]
 # unitree_sdk2py pins cyclonedds==0.10.2, whose newest pre-built wheel is CPython 3.10.
 # Anything newer forces a CMake build of CycloneDDS, so we pin the interpreter instead.
 requires-python = ">=3.10,<3.11"

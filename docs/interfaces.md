@@ -76,7 +76,7 @@ Channels the bridge logs, live and into the MCAP:
 | `/world/scene` | `foxglove.SceneUpdate` | one entity named after the world with a cube per wall, `frame_locked`, once a second; not logged in the open world |
 | `/nav/state` | JSON | `state` (`idle`, `aligning`, `walking`, `arrived`, `blind`, `stopped`), `vx`, `wz`, `front_m`, `left_m`, `right_m` (`null` when unseen), `heading_deg`; 10 Hz while navigating, then once |
 
-`/cmd_vel` is client-published. Anything else a layout advertises (for example `/move_base_simple/goal` from an ANYmal layout) is ignored.
+`/cmd_vel` is client-published. Anything else a layout advertises (for example `/move_base_simple/goal` from another robot's layout) is ignored.
 
 Services, empty JSON request, response `{"ok": true, "detail": "..."}`. A refused request answers `ok: false` with the reason in `detail`:
 

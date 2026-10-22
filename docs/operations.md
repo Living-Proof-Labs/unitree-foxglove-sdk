@@ -41,7 +41,7 @@ Continue from the fall in the health steps above. Release without the walking po
 
 `task e2e` does this fall itself, after a walk that must stay up. A walk that never goes `degraded` or `incident` writes no file under `events/`. A wall bump that recovers writes one `*-degraded-*.mcap` about 3 s after health returns to `nominal`. Creating the Foxglove event is the `foxglove-event-trigger` project, which is not in this repo and needs no key here.
 
-`task up` also starts Foxlet when `.env` has `FOXGLOVE_DEVICE_TOKEN`. Its log should show the device connected. Event files then appear on [g1-sim](https://app.foxglove.dev/anybotics/p/prj_0edsooXR5WbJ2CWJ/devices/dev_0edswdPBDBYO4uxe), in the Experimental project of the ANYbotics Foxglove org, without an import click. Telemetry files appear as not imported. The event creator is what imports the ones that overlap an event. Telemetry rolls every 60 s, so each of those files is about a minute. `task down` stops Foxlet too. The headless checks do not start it, and they keep a single telemetry file.
+`task up` also starts Foxlet when `.env` has `FOXGLOVE_DEVICE_TOKEN`. Its log should show the device connected. Event files then appear on the device associated with your token in your Foxglove organization, without an import click. Telemetry files appear as not imported. The event creator is what imports the ones that overlap an event. Telemetry rolls every 60 s, so each of those files is about a minute. `task down` stops Foxlet too. The headless checks do not start it, and they keep a single telemetry file.
 
 ## Validate the hallway walk
 
@@ -111,7 +111,7 @@ In the web app the sidebar lists `/robot/joint_states`, `/robot/base_pose`, `/tf
 
 **"Check that the WebSocket server at ws://localhost:8765 is reachable."** The bridge is not running. `task up` was stopped, or it has not logged the live-connection line yet. Reload the tab after that line appears.
 
-**Empty 3D, "image topic does not exist", diagnostics unavailable, while the topic list on the left is the `/robot/...` set.** The connection is fine. The open layout is an ANYbotics layout. Import `foxglove/g1-layout.json` and select it.
+**Empty 3D, "image topic does not exist", diagnostics unavailable, while the topic list on the left is the `/robot/...` set.** The connection is fine. The open layout targets a different robot. Import `foxglove/g1-layout.json` and select it.
 
 **The robot swings from the rope before Stand.** Motors are off. That is the start state, not a physics failure. It should settle rather than orbit. Stand, start the policy, lower, then release.
 
