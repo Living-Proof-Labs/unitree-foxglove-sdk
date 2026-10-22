@@ -81,6 +81,14 @@ From the repository root, with Docker and Task:
 | `task e2e-hallway` | Headless navigator that must reach `arrived` without a fall. Same `WORLD` variable, same domain and ports as `task e2e`. |
 | `task down` | `docker compose down --remove-orphans`. |
 
+The test tasks reuse the existing `unitree-foxglove:local` image. Use
+`task test:with-build`, `task e2e:with-build`, or
+`task e2e-hallway:with-build` to build first using Docker's normal cache.
+For example, `task e2e-hallway:with-build WORLD=hallway20` builds and then runs
+the 20 m hallway check. Rebuild after source, test, or dependency changes, since
+the tests run code baked into the image. If the image is missing, the default
+tasks stop with an instruction to build. Direct e2e scripts also reuse the image.
+
 The same stand-up the panels perform, while `task up` is running:
 
 ```bash

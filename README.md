@@ -147,6 +147,13 @@ task e2e           # headless walk that must stay up, then a fall that must writ
 task e2e-hallway   # headless navigator must reach the end of the hallway
 ```
 
+These tasks reuse the existing `unitree-foxglove:local` image. To build first,
+use `task test:with-build`, `task e2e:with-build`, or
+`task e2e-hallway:with-build`. Builds use Docker's normal cache. Rebuild after
+changing source, tests, or dependencies, since tests run the code baked into the
+image. A missing image produces an instruction to build it. Direct e2e script
+invocations also reuse the existing image.
+
 `task e2e` has two phases. The walk passes when the base travelled at least 0.3 m and never dropped below 0.5 m, and health never reported `incident`. A fall there fails it; open that MCAP in Foxglove to see why. The second phase releases the robot without the walking policy and passes when health reaches `incident` and one small file appears under `recordings/events/`. The simulator's real-time factor should read `1.00`.
 
 ## Go2
