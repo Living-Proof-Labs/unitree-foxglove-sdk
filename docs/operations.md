@@ -95,7 +95,7 @@ Bridge log contains `live Foxglove connection ws://127.0.0.1:8765`, then `robot 
 
 Loco log contains `loco connected, mode damp`.
 
-Sim log contains `simulator publishing on domain 1` and a real-time factor near `1.00`.
+Sim log contains `simulator publishing on domain 1` and a real-time factor near `1.00`. The MuJoCo window looks at the pelvis, so the whole robot is in frame at the start. The lidar fan is not drawn there; it is on `/scan`.
 
 In the web app the sidebar lists `/robot/joint_states`, `/robot/base_pose`, `/tf`, the IMU topics, the velocity topic, `/scan`, and `/nav/state`. `/world/scene` appears only in a hallway world. The layout name is the imported `g1-layout`, and the 3D panel shows the robot. Service buttons are on the right. Teleop is under them.
 

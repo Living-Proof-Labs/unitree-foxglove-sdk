@@ -155,6 +155,22 @@ def main() -> None:
     run(settings)
 
 
+def _frame_viewer(mujoco: object, viewer: object) -> None:
+    """Look at the hanging pelvis and leave the lidar fan undrawn.
+
+    The scene statistic is centred at z = 0.5, the feet, so the default free
+    camera cuts the torso off the top of the window. The 72 rangefinder rays
+    are the ``/scan`` telemetry; drawing them hides the robot.
+    """
+    cam = viewer.cam  # type: ignore[attr-defined]
+    cam.type = mujoco.mjtCamera.mjCAMERA_FREE  # type: ignore[attr-defined]
+    cam.lookat[:] = (0.0, 0.0, 0.9)
+    cam.distance = 5.0
+    cam.azimuth = 135.0
+    cam.elevation = -18.0
+    viewer.opt.flags[mujoco.mjtVisFlag.mjVIS_RANGEFINDER] = 0  # type: ignore[attr-defined]
+
+
 def run(settings: Settings) -> None:
     """Step the physics and publish Unitree DDS state."""
     import mujoco
@@ -189,6 +205,7 @@ def run(settings: Settings) -> None:
     if not settings.headless:
         key_callback = band.on_key if band is not None else None
         viewer = mujoco.viewer.launch_passive(model, data, key_callback=key_callback)
+        _frame_viewer(mujoco, viewer)
 
     def on_sim_command(command: SimCommand) -> None:
         if band is not None:
