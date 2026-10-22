@@ -16,3 +16,7 @@ third_party/unitree_rl_gym/**
 !third_party/unitree_rl_gym/deploy/deploy_real/configs/g1.yaml
 !third_party/unitree_rl_gym/resources/robots/g1_description/g1_29dof.urdf
 !third_party/unitree_rl_gym/resources/robots/g1_description/meshes/**
+
+# Local and CI evidence
+artifacts/
+work/

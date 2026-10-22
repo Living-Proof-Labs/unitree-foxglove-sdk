@@ -53,7 +53,20 @@ tasks:
     desc: Run unit tests using the existing image
     deps: [image-ready]
     cmds:
-      - docker compose run --rm --no-deps --entrypoint pytest sim -p no:cacheprovider tests
+      - mkdir -p artifacts/unit
+      - docker compose run --rm --no-deps -v "{{.ROOT_DIR}}/artifacts/unit:/reports" --entrypoint pytest sim -p no:cacheprovider tests --junitxml=/reports/junit.xml
+
+  lint:
+    desc: Check Python source and tests with Ruff using the existing image
+    deps: [image-ready]
+    cmds:
+      - docker compose run --rm --no-deps -v "{{.ROOT_DIR}}:/workspace:ro" -w /workspace --entrypoint ruff sim check --no-cache src tests scripts
+
+  ci:unit:
+    desc: Build, lint, and run unit tests with logs and a terminal cast
+    cmds:
+      - python3 scripts/capture.py artifacts/unit -- task test:with-build
+      - python3 scripts/capture.py artifacts/lint -- task lint
 
   test:with-build:
     desc: Build the image, then run unit tests
