@@ -17,6 +17,12 @@ tasks:
     cmds:
       - docker compose build
 
+  image-ready:
+    internal: true
+    preconditions:
+      - sh: docker image inspect unitree-foxglove:local >/dev/null 2>&1
+        msg: 'Image unitree-foxglove:local is missing. Run task build or the corresponding :with-build task.'
+
   up:
     desc: G1 in MuJoCo with the Foxglove bridge and the walking policy
     deps: [build]
@@ -44,22 +50,42 @@ tasks:
       - xdg-open "{{.FOXGLOVE_URL}}"
 
   test:
-    desc: Run unit tests inside the image
-    deps: [build]
+    desc: Run unit tests using the existing image
+    deps: [image-ready]
     cmds:
       - docker compose run --rm --no-deps --entrypoint pytest sim -p no:cacheprovider tests
 
+  test:with-build:
+    desc: Build the image, then run unit tests
+    cmds:
+      - task: build
+      - task: test
+
   e2e:
-    desc: Headless walk that must stay up, then a fall that must write an event MCAP
+    desc: Headless walk and deliberate fall using the existing image
+    deps: [image-ready]
     cmds:
       - bash scripts/e2e.sh
 
+  e2e:with-build:
+    desc: Build the image, then run the headless walk and deliberate fall
+    cmds:
+      - task: build
+      - task: e2e
+
   e2e-hallway:
-    desc: Headless navigator must reach the end of the hallway (WORLD=hallway10 or hallway20)
+    desc: Headless hallway navigation using the existing image (WORLD=hallway10 or hallway20)
+    deps: [image-ready]
     env:
       E2E_WORLD: '{{.WORLD | default "hallway10"}}'
     cmds:
       - bash scripts/e2e_hallway.sh
+
+  e2e-hallway:with-build:
+    desc: Build the image, then run headless hallway navigation (WORLD=hallway10 or hallway20)
+    cmds:
+      - task: build
+      - task: e2e-hallway
 
   down:
     desc: Stop every service

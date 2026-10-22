@@ -42,7 +42,8 @@ cleanup() {
 }
 trap cleanup EXIT
 
-compose up -d --build sim bridge loco
+# Task's :with-build variant builds before invoking this script.
+compose up -d --no-build sim bridge loco
 
 wait_for_log() {
   local service="$1" pattern="$2" tries="${3:-60}" need="${4:-1}"
