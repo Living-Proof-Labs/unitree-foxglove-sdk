@@ -1,0 +1,34 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": [
+    "github>Living-Proof-Labs/collaboration-guidelines:renovate-preset#v7.10.4"
+  ],
+  "enabledManagers": [
+    "github-actions",
+    "dockerfile",
+    "docker-compose",
+    "npm",
+    "pip-compile",
+    "custom.regex",
+    "pep621"
+  ],
+  "ignorePaths": [
+    "**/node_modules/**",
+    "tools/renovate/fixtures/**",
+    "docs/adr/**",
+    "docs/issues/**",
+    "third_party/**"
+  ],
+  "packageRules": [
+    {
+      "description": "Python 3.10 is an explicit repository compatibility constraint for the pinned CycloneDDS wheel; interpreter upgrades require a separate design change.",
+      "matchManagers": [
+        "pep621"
+      ],
+      "matchDepTypes": [
+        "requires-python"
+      ],
+      "enabled": false
+    }
+  ]
+}
