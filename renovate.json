@@ -1,9 +1,10 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": [
-    "github>Living-Proof-Labs/collaboration-guidelines:renovate-preset#v7.10.4"
+    "github>Living-Proof-Labs/collaboration-guidelines:renovate-preset#v7.10.8"
   ],
   "enabledManagers": [
+    "renovate-config",
     "github-actions",
     "dockerfile",
     "docker-compose",
